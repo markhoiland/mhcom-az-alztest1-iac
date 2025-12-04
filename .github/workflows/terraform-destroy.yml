@@ -1,0 +1,120 @@
+# Terraform Destroy Workflow
+# Manual workflow for destroying infrastructure
+# Use with extreme caution!
+
+name: 'Terraform Destroy'
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        type: choice
+        options:
+          - Landing-Zone
+          - Management
+      confirm:
+        description: 'Type "DESTROY" to confirm'
+        required: true
+        type: string
+
+permissions:
+  id-token: write   # Required for OIDC authentication
+  contents: read    # Required to checkout repository
+
+env:
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  TF_VERSION: '1.12.0'
+
+jobs:
+  validate-confirmation:
+    name: 'Validate Confirmation'
+    runs-on: ubuntu-latest
+    outputs:
+      confirmed: ${{ steps.confirm.outputs.confirmed }}
+    steps:
+      - name: Validate Confirmation
+        id: confirm
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" == "DESTROY" ]; then
+            echo "confirmed=true" >> $GITHUB_OUTPUT
+            echo "::warning::Destruction confirmed for ${{ github.event.inputs.environment }}"
+          else
+            echo "confirmed=false" >> $GITHUB_OUTPUT
+            echo "::error::Confirmation text does not match. Expected 'DESTROY', got '${{ github.event.inputs.confirm }}'"
+            exit 1
+          fi
+
+  terraform-destroy-landing-zone:
+    name: 'Destroy Landing-Zone'
+    runs-on: ubuntu-latest
+    needs: validate-confirmation
+    environment: production-destroy
+    if: needs.validate-confirmation.outputs.confirmed == 'true' && github.event.inputs.environment == 'Landing-Zone'
+    defaults:
+      run:
+        working-directory: Landing-Zone
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Destroy Plan
+        run: terraform plan -destroy -no-color -input=false -out=tfplan-destroy
+
+      - name: Terraform Destroy
+        run: terraform apply -auto-approve -input=false tfplan-destroy
+
+  terraform-destroy-management:
+    name: 'Destroy Management'
+    runs-on: ubuntu-latest
+    needs: validate-confirmation
+    environment: production-destroy
+    if: needs.validate-confirmation.outputs.confirmed == 'true' && github.event.inputs.environment == 'Management'
+    defaults:
+      run:
+        working-directory: Management
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Destroy Plan
+        run: terraform plan -destroy -no-color -input=false -out=tfplan-destroy
+
+      - name: Terraform Destroy
+        run: terraform apply -auto-approve -input=false tfplan-destroy

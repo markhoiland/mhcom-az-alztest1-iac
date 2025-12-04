@@ -1,0 +1,40 @@
+# Example terraform.tfvars for Landing Zone
+# Copy this file to terraform.tfvars and update values for your environment
+
+# Optional: Root Management Group ID (typically your tenant ID)
+# If not provided, the module will use the tenant ID from the authenticated session
+# Do not include the full resource path, just the name/ID
+# root_management_group_id = "your-tenant-id"
+
+# Default Azure region for policy managed identities
+location = "eastus"
+
+# Optional: Place subscriptions into management groups
+# Each entry needs a unique key (arbitrary), subscription_id, and management_group_name
+# subscription_placement = {
+#   "corp-sub1" = {
+#     subscription_id       = "00000000-0000-0000-0000-000000000001"
+#     management_group_name = "landing-zones-corp"
+#   }
+#   "online-sub1" = {
+#     subscription_id       = "00000000-0000-0000-0000-000000000002"
+#     management_group_name = "landing-zones-online"
+#   }
+# }
+
+# Optional: Customize policy assignments
+# Keyed by management group ID
+# policy_assignments_to_modify = {
+#   "landing-zones" = {
+#     policy_assignments = {
+#       "Deploy-VM-Backup" = {
+#         enforcement_mode = "DoNotEnforce"
+#       }
+#     }
+#   }
+# }
+
+# Optional: Set default values for policies (JSON-encoded values)
+# policy_default_values = {
+#   "logAnalyticsWorkspaceId" = "\"/subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/...\""
+# }
