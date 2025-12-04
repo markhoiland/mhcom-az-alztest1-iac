@@ -1,5 +1,11 @@
 # Management Variables
 
+variable "subscription_id_management" {
+  description = "Azure subscription ID for management resources"
+  type        = string
+  sensitive   = true
+}
+
 variable "automation_account_name" {
   description = "The name of the automation account"
   type        = string

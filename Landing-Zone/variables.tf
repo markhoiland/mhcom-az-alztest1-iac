@@ -1,5 +1,11 @@
 # Landing Zone Variables
 
+variable "subscription_id_management" {
+  description = "Azure subscription ID for management resources"
+  type        = string
+  sensitive   = true
+}
+
 variable "root_management_group_id" {
   description = "The ID of the root management group (typically the Tenant Root Group). Do not include the full resource path, just the name/ID. If not provided, uses the tenant ID."
   type        = string

@@ -14,7 +14,7 @@ override.tf.json
 terraform.rc
 
 # Sensitive variable files
-*.tfvars
+#*.tfvars
 !*.tfvars.example
 
 # IDE and editor files
@@ -34,3 +34,4 @@ Thumbs.db
 
 # Log files
 *.log
+.alzlib

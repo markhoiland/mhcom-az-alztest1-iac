@@ -1,5 +1,6 @@
 # Example terraform.tfvars for Management
 # Copy this file to terraform.tfvars and update values for your environment
+subscription_id_management = "3ed8eb5b-718e-48ed-ae2a-344533d4b616"
 
 # Required: Resource names
 automation_account_name      = "aa-alz-management"

@@ -20,20 +20,22 @@ terraform {
 
   # Configure remote backend for state management
   # Uncomment and configure for your environment
-  # backend "azurerm" {
-  #   resource_group_name  = "rg-terraform-state"
-  #   storage_account_name = "stterraformstate"
-  #   container_name       = "tfstate"
-  #   key                  = "alz-landing-zone.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name  = "rg-tfstate-management"
+    storage_account_name = "stmhcommgmt01"
+    container_name       = "tfstate"
+    key                  = "management-landing-zone.tfstate"
+    use_azuread_auth     = true
+  }
 }
 
 provider "azurerm" {
-  features {}
-
-  # OIDC authentication is configured via environment variables:
-  # ARM_CLIENT_ID, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID
-  # ARM_USE_OIDC=true
+  features {
+    log_analytics_workspace {
+      permanently_delete_on_destroy = true
+    }
+  }
+  subscription_id = var.subscription_id_management
 }
 
 # ALZ provider configuration
