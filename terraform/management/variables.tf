@@ -65,21 +65,6 @@ variable "automation_account_sku_name" {
   default     = "Basic"
 }
 
-variable "data_collection_rules" {
-  description = "Map of data collection rules to create"
-  type = map(object({
-    name               = string
-    description        = optional(string, null)
-    destinations       = any
-    data_flows         = any
-    data_sources       = optional(any, null)
-    kind               = optional(string, null)
-    stream_declaration = optional(any, null)
-    tags               = optional(map(string), null)
-  }))
-  default = {}
-}
-
 variable "enable_telemetry" {
   description = "Enable telemetry for the module"
   type        = bool
@@ -192,13 +177,4 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default     = {}
-}
-
-variable "user_assigned_managed_identities" {
-  description = "Map of user assigned managed identities to create"
-  type = map(object({
-    name = string
-    tags = optional(map(string), null)
-  }))
-  default = {}
 }

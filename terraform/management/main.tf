@@ -56,7 +56,6 @@ module "alz_management" {
   automation_account_local_authentication_enabled            = var.automation_account_local_authentication_enabled
   automation_account_public_network_access_enabled           = var.automation_account_public_network_access_enabled
   automation_account_sku_name                                = var.automation_account_sku_name
-  data_collection_rules                                      = var.data_collection_rules
   enable_telemetry                                           = var.enable_telemetry
   linked_automation_account_creation_enabled                 = var.linked_automation_account_creation_enabled
   log_analytics_solution_plans                               = var.log_analytics_solution_plans
@@ -72,5 +71,7 @@ module "alz_management" {
   resource_group_creation_enabled                            = var.resource_group_creation_enabled
   sentinel_onboarding                                        = var.sentinel_onboarding
   tags                                                       = var.tags
-  user_assigned_managed_identities                           = var.user_assigned_managed_identities
+
+  # Note: data_collection_rules and user_assigned_managed_identities use module defaults
+  # which include required attributes (vm_insights for DCR, ama for UAMI)
 }
