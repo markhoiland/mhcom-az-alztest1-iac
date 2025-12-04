@@ -5,16 +5,17 @@ This repository contains Infrastructure as Code (IaC) for deploying Azure Landin
 ## 📁 Repository Structure
 
 ```
-├── Landing-Zone/                    # Core ALZ hierarchy and policies
-│   ├── main.tf                      # Main configuration using avm-ptn-alz
-│   ├── variables.tf                 # Variable definitions
-│   ├── outputs.tf                   # Output definitions
-│   └── terraform.tfvars.example     # Example variable values
-├── Management/                      # ALZ Management resources
-│   ├── main.tf                      # Main configuration using avm-ptn-alz-management
-│   ├── variables.tf                 # Variable definitions
-│   ├── outputs.tf                   # Output definitions
-│   └── terraform.tfvars.example     # Example variable values
+├── terraform/
+│   ├── landing-zone/                # Core ALZ hierarchy and policies
+│   │   ├── main.tf                  # Main configuration using avm-ptn-alz
+│   │   ├── variables.tf             # Variable definitions
+│   │   ├── outputs.tf               # Output definitions
+│   │   └── terraform.tfvars.example # Example variable values
+│   └── management/                  # ALZ Management resources
+│       ├── main.tf                  # Main configuration using avm-ptn-alz-management
+│       ├── variables.tf             # Variable definitions
+│       ├── outputs.tf               # Output definitions
+│       └── terraform.tfvars.example # Example variable values
 ├── .github/workflows/               # GitHub Actions CI/CD
 │   ├── terraform-plan.yml           # PR validation and planning
 │   ├── terraform-apply.yml          # Apply on merge to main
@@ -172,7 +173,7 @@ git clone https://github.com/<your-org>/<your-repo>.git
 cd <your-repo>
 
 # Navigate to the desired configuration
-cd Landing-Zone  # or Management
+cd terraform/landing-zone  # or terraform/management
 
 # Copy and configure variables
 cp terraform.tfvars.example terraform.tfvars

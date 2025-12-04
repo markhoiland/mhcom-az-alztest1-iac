@@ -8,19 +8,19 @@ on:
     branches:
       - main
     paths:
-      - 'Landing-Zone/**'
-      - 'Management/**'
+      - 'terraform/landing-zone/**'
+      - 'terraform/management/**'
       - '.github/workflows/**'
   workflow_dispatch:
     inputs:
       environment:
         description: 'Environment to plan'
         required: true
-        default: 'Landing-Zone'
+        default: 'landing-zone'
         type: choice
         options:
-          - Landing-Zone
-          - Management
+          - landing-zone
+          - management
           - all
 
 permissions:
@@ -37,14 +37,14 @@ env:
 
 jobs:
   terraform-plan-landing-zone:
-    name: 'Plan Landing-Zone'
+    name: 'Plan landing-zone'
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request' ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'Landing-Zone' || github.event.inputs.environment == 'all'))
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'landing-zone' || github.event.inputs.environment == 'all'))
     defaults:
       run:
-        working-directory: Landing-Zone
+        working-directory: terraform/landing-zone
 
     steps:
       - name: Checkout
@@ -116,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: landing-zone-tfplan
-          path: Landing-Zone/tfplan
+          path: terraform/landing-zone/tfplan
           retention-days: 5
 
       - name: Terraform Plan Status
@@ -124,14 +124,14 @@ jobs:
         run: exit 1
 
   terraform-plan-management:
-    name: 'Plan Management'
+    name: 'Plan management'
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request' ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'Management' || github.event.inputs.environment == 'all'))
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'management' || github.event.inputs.environment == 'all'))
     defaults:
       run:
-        working-directory: Management
+        working-directory: terraform/management
 
     steps:
       - name: Checkout
@@ -203,7 +203,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: management-tfplan
-          path: Management/tfplan
+          path: terraform/management/tfplan
           retention-days: 5
 
       - name: Terraform Plan Status

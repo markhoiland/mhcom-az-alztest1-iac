@@ -8,18 +8,18 @@ on:
     branches:
       - main
     paths:
-      - 'Landing-Zone/**'
-      - 'Management/**'
+      - 'terraform/landing-zone/**'
+      - 'terraform/management/**'
   workflow_dispatch:
     inputs:
       environment:
         description: 'Environment to apply'
         required: true
-        default: 'Landing-Zone'
+        default: 'landing-zone'
         type: choice
         options:
-          - Landing-Zone
-          - Management
+          - landing-zone
+          - management
           - all
       auto_approve:
         description: 'Auto approve the apply (use with caution)'
@@ -40,15 +40,15 @@ env:
 
 jobs:
   terraform-apply-landing-zone:
-    name: 'Apply Landing-Zone'
+    name: 'Apply landing-zone'
     runs-on: ubuntu-latest
     environment: production
     if: |
       github.event_name == 'push' ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'Landing-Zone' || github.event.inputs.environment == 'all'))
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'landing-zone' || github.event.inputs.environment == 'all'))
     defaults:
       run:
-        working-directory: Landing-Zone
+        working-directory: terraform/landing-zone
 
     steps:
       - name: Checkout
@@ -81,15 +81,15 @@ jobs:
         run: terraform apply -auto-approve -input=false tfplan
 
   terraform-apply-management:
-    name: 'Apply Management'
+    name: 'Apply management'
     runs-on: ubuntu-latest
     environment: production
     if: |
       github.event_name == 'push' ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'Management' || github.event.inputs.environment == 'all'))
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'management' || github.event.inputs.environment == 'all'))
     defaults:
       run:
-        working-directory: Management
+        working-directory: terraform/management
 
     steps:
       - name: Checkout
