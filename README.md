@@ -11,11 +11,16 @@ This repository contains Infrastructure as Code (IaC) for deploying Azure Landin
 │   │   ├── variables.tf             # Variable definitions
 │   │   ├── outputs.tf               # Output definitions
 │   │   └── terraform.tfvars.example # Example variable values
-│   └── management/                  # ALZ Management resources
-│       ├── main.tf                  # Main configuration using avm-ptn-alz-management
+│   ├── management/                  # ALZ Management resources
+│   │   ├── main.tf                  # Main configuration using avm-ptn-alz-management
+│   │   ├── variables.tf             # Variable definitions
+│   │   ├── outputs.tf               # Output definitions
+│   │   └── terraform.tfvars.example # Example variable values
+│   └── connectivity/                # Hub and Spoke network connectivity
+│       ├── main.tf                  # Main configuration using avm-ptn-alz-connectivity-hub-and-spoke-vnet
 │       ├── variables.tf             # Variable definitions
 │       ├── outputs.tf               # Output definitions
-│       └── terraform.tfvars.example # Example variable values
+│       └── terraform.tfvars         # Example variable values
 ├── .github/workflows/               # GitHub Actions CI/CD
 │   ├── terraform-plan.yml           # PR validation and planning
 │   ├── terraform-apply.yml          # Apply on merge to main
@@ -39,6 +44,17 @@ Uses [Azure/terraform-azurerm-avm-ptn-alz-management](https://github.com/Azure/t
 - Data Collection Rules
 - Microsoft Sentinel (optional)
 - User Assigned Managed Identities
+
+### Connectivity Module
+Uses [Azure/terraform-azurerm-avm-ptn-alz-connectivity-hub-and-spoke-vnet](https://github.com/Azure/terraform-azurerm-avm-ptn-alz-connectivity-hub-and-spoke-vnet) to deploy:
+- Hub Virtual Networks with address space management
+- Azure Firewall and Firewall Policy
+- Azure Bastion for secure VM access
+- VPN and ExpressRoute Gateways
+- Private DNS Zones for Azure Private Link
+- Private DNS Resolver
+- Route Tables for traffic management
+- DDoS Protection Plan (shared across hubs)
 
 ## 🔐 Prerequisites
 
@@ -285,6 +301,17 @@ terraform apply tfplan
 | `sentinel_onboarding` | No | `null` | Enable Microsoft Sentinel |
 | `log_analytics_workspace_retention_in_days` | No | `30` | Log retention period |
 
+### Connectivity Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `subscription_id_connectivity` | Yes | - | Azure subscription ID for connectivity resources |
+| `hub_virtual_networks` | Yes | `{}` | Map of hub networks with location and configuration |
+| `hub_and_spoke_networks_settings` | No | `{}` | Shared settings like DDoS protection plan |
+| `default_naming_convention` | No | (see below) | Naming conventions with placeholders |
+| `enable_telemetry` | No | `true` | Enable module telemetry |
+| `tags` | No | `{}` | Tags for all resources |
+
 ---
 
 ## 🛡️ Security Best Practices
@@ -341,6 +368,7 @@ terraform providers
 - [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/)
 - [AVM ALZ Pattern Module](https://github.com/Azure/terraform-azurerm-avm-ptn-alz)
 - [AVM ALZ Management Module](https://github.com/Azure/terraform-azurerm-avm-ptn-alz-management)
+- [AVM ALZ Hub and Spoke Connectivity Module](https://github.com/Azure/terraform-azurerm-avm-ptn-alz-connectivity-hub-and-spoke-vnet)
 - [GitHub Actions OIDC](https://docs.github.com/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-azure)
 - [Terraform AzureRM Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
 
