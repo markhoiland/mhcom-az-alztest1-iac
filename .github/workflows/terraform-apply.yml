@@ -1,0 +1,122 @@
+# GitHub Actions CI/CD for Azure Landing Zones
+# Uses OpenID Connect (OIDC) for secure, secretless authentication to Azure
+
+name: 'Terraform Apply'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/landing-zone/**'
+      - 'terraform/management/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to apply'
+        required: true
+        default: 'landing-zone'
+        type: choice
+        options:
+          - landing-zone
+          - management
+          - all
+      auto_approve:
+        description: 'Auto approve the apply (use with caution)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write   # Required for OIDC authentication
+  contents: read    # Required to checkout repository
+
+env:
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  TF_VERSION: '1.12.0'
+
+jobs:
+  terraform-apply-landing-zone:
+    name: 'Apply landing-zone'
+    runs-on: ubuntu-latest
+    environment: production
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'landing-zone' || github.event.inputs.environment == 'all'))
+    defaults:
+      run:
+        working-directory: terraform/landing-zone
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false -out=tfplan
+
+      - name: Terraform Apply
+        if: github.event.inputs.auto_approve == 'true' || github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false tfplan
+
+  terraform-apply-management:
+    name: 'Apply management'
+    runs-on: ubuntu-latest
+    environment: production
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'management' || github.event.inputs.environment == 'all'))
+    defaults:
+      run:
+        working-directory: terraform/management
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false -out=tfplan
+
+      - name: Terraform Apply
+        if: github.event.inputs.auto_approve == 'true' || github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false tfplan
